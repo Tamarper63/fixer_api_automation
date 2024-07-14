@@ -2,34 +2,18 @@ package org.example;
 
 import io.restassured.response.Response;
 import org.example.models.ExchangeRatesErrorResponse;
-import org.example.models.ExchangeRatesLatestResponse;
-import org.example.responses.ExchangeRatesEndpoint;
-import org.example.responses.HistoricalResponse;
-import org.example.responses.LatestResponse;
-import org.junit.BeforeClass;
+import org.example.responses.BaseExchangeResponse;
 import org.junit.Test;
-
 import java.time.LocalDate;
-import java.util.Map;
-
 import static io.restassured.RestAssured.given;
-import static org.example.ApiConfig.HISTORICAL_RATES_ENDPOINT;
 import static org.example.ApiConfig.LATEST_ENDPOINT;
-import static org.example.models.Consts.EXPECTED_LATEST_RESPONSE;
+import static org.example.FixerApiUtils.validateRatesType;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 
-public class ExchangeRatesApiTests extends BaseApiTest {
-
-    private static ExchangeRatesEndpoint exchangeRatesEndpoint;
-
-    @BeforeClass
-    public static void setupExchangeRatesEndpoint() {
-        exchangeRatesEndpoint = ExchangeRatesEndpoint.builder(requestSpec);
-    }
-
+public class ExchangeRatesLatestTests extends BaseApiTest {
 
     @Test
     public void validateEmptyApiKeyResponse() {
@@ -43,7 +27,7 @@ public class ExchangeRatesApiTests extends BaseApiTest {
         Response response = given()
                 .queryParam("access_key", "") // Provide an empty API key or remove this line to test without key
                 .when()
-                .get(HISTORICAL_RATES_ENDPOINT);
+                .get(LATEST_ENDPOINT);
 
         // Deserialize the actual API error response
         ExchangeRatesErrorResponse actualErrorResponse = response.as(ExchangeRatesErrorResponse.class);
@@ -57,16 +41,10 @@ public class ExchangeRatesApiTests extends BaseApiTest {
 
     @Test
     public void exchangeRatesByDefaultRelativeEUR() {
-        Response response = given()
-                .queryParam("access_key", ApiConfig.ACCESS_KEY)
-                .when()
-                .get(LATEST_ENDPOINT)
-                .then()
-                .statusCode(200)
-                .extract()
-                .response();
 
-        // Assert "base" currency is EUR
+        Response response = exchangeRatesEndpoint
+                .getLatestRates();
+
         String baseCurrency = response.jsonPath().getString("base");
         assertThat(baseCurrency, equalTo("EUR"));
     }
@@ -74,38 +52,27 @@ public class ExchangeRatesApiTests extends BaseApiTest {
     @Test
     public void validateAllParamsTypeResponse() {
         // Perform the actual API request
-        Response response = given().queryParam("access_key", ApiConfig.ACCESS_KEY)
-                .when()
-                .get(LATEST_ENDPOINT)
-                .then()
-                .statusCode(200) // Validate the response status code is 200
-                .extract()
-                .response();
+        Response response = exchangeRatesEndpoint
+                .getLatestRates();
 
-        ExchangeRatesLatestResponse actualResponse = response.as(ExchangeRatesLatestResponse.class);
+        BaseExchangeResponse actualResponse = response.as(BaseExchangeResponse.class);
 
         // Validate types of fields against expected types
         assertThat(actualResponse.isSuccess(), instanceOf(Boolean.class)); // Check if isSuccess() returns Boolean
         assertThat(actualResponse.getBase(), instanceOf(String.class));    // Check if getBase() returns String
         assertThat(actualResponse.getDate(), instanceOf(String.class));    // Check if getDate() returns String
-        assertThat(actualResponse.getRates(), instanceOf(java.util.HashMap.class)); // Check if getRates() returns a HashMap
+        validateRatesType(actualResponse);
 
     }
-
     @Test
     public void validateCurrentDateParams() {
+        Response response = exchangeRatesEndpoint
+                .getLatestRates();
 
-        Response response = given().queryParam("access_key", ApiConfig.ACCESS_KEY)
-                .when()
-                .get(LATEST_ENDPOINT)
-                .then()
-                .statusCode(200) // Validate the response status code is 200
-                .extract()
-                .response();
-
-        ExchangeRatesLatestResponse actualResponse = response.as(ExchangeRatesLatestResponse.class);
-        assertThat(actualResponse.getDate(), equalTo(EXPECTED_LATEST_RESPONSE.getDate()));
+        BaseExchangeResponse actualResponse = response.as(BaseExchangeResponse.class);
+        assertThat(actualResponse.getDate(), equalTo(LocalDate.now().toString()));
     }
+
 }
 
 

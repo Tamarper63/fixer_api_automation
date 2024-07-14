@@ -12,7 +12,7 @@ public abstract class BaseApiTest {
     @BeforeClass
     public static void setup() {
         RestAssured.baseURI = ApiConfig.BASE_URL;
-        requestSpec = RestAssured.given().log().all();
-        exchangeRatesEndpoint = ExchangeRatesEndpoint.builder(requestSpec);
+        requestSpec = RestAssured.given().queryParam("access_key", ApiConfig.ACCESS_KEY).log().all();
+        exchangeRatesEndpoint = ExchangeRatesEndpoint.newInstance(requestSpec);
     }
 }

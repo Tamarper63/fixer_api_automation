@@ -2,22 +2,24 @@ package org.example.responses;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
-
+@AllArgsConstructor
 @Data
-@Builder
+//@Builder
 public class BaseExchangeResponse {
-    private boolean success;
-    private long timestamp;
-    private String base;
-    private String date;
-    private Map<String, Double> rates;
 
-    @Builder.Default
-    private boolean historical = false;
+   boolean success;
+  long timestamp;
+    @JsonProperty("base") String base;
+    @JsonProperty("date") String date;
+    @JsonProperty("rates") Map<String, Double> rates;
+    @JsonProperty("historical") boolean historical;
+
 
     @JsonCreator
     public BaseExchangeResponse(

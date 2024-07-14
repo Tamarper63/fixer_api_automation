@@ -5,30 +5,28 @@ import io.restassured.specification.RequestSpecification;
 
 public class ExchangeRatesEndpoint {
     private final RequestSpecification requestSpec;
-    private boolean historical;
 
     private ExchangeRatesEndpoint(RequestSpecification requestSpec) {
         this.requestSpec = requestSpec;
     }
 
-    public static ExchangeRatesEndpoint builder(RequestSpecification requestSpec) {
+    public static ExchangeRatesEndpoint newInstance(RequestSpecification requestSpec) {
         return new ExchangeRatesEndpoint(requestSpec);
     }
 
-    public ExchangeRatesEndpoint withHistorical(boolean historical) {
-        this.historical = historical;
-        return this;
-    }
 
     public Response getLatestRates() {
         return requestSpec.get("/latest")
                 .then()
+                .statusCode(200)
                 .extract()
                 .response();
     }
 
-    public Response getHistoricalRates() {
-        return requestSpec.get("/historical")
+    public Response getHistoricalRates(String date) {
+//        RequestSpecification spec = requestSpec
+//                .queryParam("historical", true);
+        return requestSpec.get("/" + date)
                 .then()
                 .extract()
                 .response();

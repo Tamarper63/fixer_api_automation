@@ -1,108 +1,81 @@
 package org.example;
 
 import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import org.example.models.ExchangeRatesHistoricalResponse;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
+import org.example.models.ExchangeRatesErrorResponse;
 import org.example.responses.BaseExchangeResponse;
-import org.example.responses.ExchangeRatesEndpoint;
-import org.example.responses.HistoricalResponse;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static io.restassured.RestAssured.given;
-import static org.example.ApiConfig.HISTORICAL_RATES_ENDPOINT;
-import static org.example.FixerApiUtils.givenFixerApi;
-import static org.example.models.Consts.EXPECTED_HISTORICAL_RESPONSE;
+import java.time.LocalDate;
+
+import static org.example.FixerApiUtils.validateRatesType;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+@Slf4j
 public class ExchangeRatesHistoricalTests extends BaseApiTest {
-
-    private static ExchangeRatesEndpoint exchangeRatesEndpoint;
-
-    @BeforeClass
-    public static void setupExchangeRatesEndpoint() {
-        exchangeRatesEndpoint = ExchangeRatesEndpoint.builder(requestSpec);
-    }
-
+    public static final String DATE = "2013-12-24";
 
     @Test
     public void validateHistoricalEqualTrue() {
-        HistoricalResponse exchangeRatesHistoricalResponse = EXPECTED_HISTORICAL_RESPONSE;
+        Response response = exchangeRatesEndpoint
+                .getHistoricalRates(DATE);
 
-        // Perform the actual API request
-        Response response = givenFixerApi()
-                .when()
-                .get(HISTORICAL_RATES_ENDPOINT)
-                .then()
-                .statusCode(200) // Validate the response status code is 200
-                .extract()
-                .response();
+        BaseExchangeResponse actualResponse = response.as(BaseExchangeResponse.class);
 
-        ExchangeRatesHistoricalResponse actualResponse = response.as(ExchangeRatesHistoricalResponse.class);
-
-        assertThat(actualResponse.isHistorical(), equalTo(exchangeRatesHistoricalResponse.isHistorical()));
+        assertThat(actualResponse.isHistorical(), equalTo(true));
     }
 
     @Test
     public void validateHistoricalDate() {
-        HistoricalResponse exchangeRatesHistoricalResponse = EXPECTED_HISTORICAL_RESPONSE;
+        Response response = exchangeRatesEndpoint
+                .getHistoricalRates(DATE);
 
-        // Perform the actual API request
-        Response response = given().queryParam("access_key", ApiConfig.ACCESS_KEY)
-                .when()
-                .get(HISTORICAL_RATES_ENDPOINT)
-                .then()
-                .statusCode(200) // Validate the response status code is 200
-                .extract()
-                .response();
-
-        ExchangeRatesHistoricalResponse actualResponse = response.as(ExchangeRatesHistoricalResponse.class);
-
-        assertThat(actualResponse.getDate(), equalTo(exchangeRatesHistoricalResponse.getDate()));
+        BaseExchangeResponse actualResponse = response.as(BaseExchangeResponse.class);
+        assertThat(actualResponse.getDate(), equalTo(DATE));
     }
 
     //Potential Errors
     @Test
-    public void inValidateHistoricalDateReturnDefault() {
+    public void inValidateHistoricalDateReturnError() {
         String invalidDate = "";
 
-        HistoricalResponse expectedErrorResponse = EXPECTED_HISTORICAL_RESPONSE;
+        //expected error
+        ExchangeRatesErrorResponse.Error error = new ExchangeRatesErrorResponse.Error(103, "missing_access_key", "You have not supplied an API Access Key. [Required format: access_key=YOUR_ACCESS_KEY]");
 
-        // Perform the actual API request with invalid date
-        Response response = given()
-                .queryParam("access_key", ApiConfig.ACCESS_KEY)
-                .queryParam("date", invalidDate)
-                .when()
-                .get(HISTORICAL_RATES_ENDPOINT)
-                .then()
-                .statusCode(200) // Validate the response status code is 200
-                .extract()
-                .response();
+        ExchangeRatesErrorResponse expectedErrorResponse = ExchangeRatesErrorResponse.builder()
+                .success(false)
+                .error(error)
+                .build();
 
+        Response response = exchangeRatesEndpoint.getHistoricalRates(invalidDate);
 
-        // Deserialize the actual API error response
-        ExchangeRatesHistoricalResponse actualErrorResponse = response.as(ExchangeRatesHistoricalResponse.class);
+        ExchangeRatesErrorResponse actualErrorResponse = response.as(ExchangeRatesErrorResponse.class);
 
         // Validate error code and description
-        assertThat(actualErrorResponse.getDate(), equalTo(expectedErrorResponse.getDate()));
+        assertThat(actualErrorResponse.getError().getCode(), equalTo(expectedErrorResponse.getError().getCode()));
+
     }
 
-
     /////NewLogic
-
     @Test
     public void testGetHistoricalRates() {
-        Response response = exchangeRatesEndpoint.withHistorical(true)
-                .getHistoricalRates();
+        log.info("getHistorical {}", LocalDate.now().toString());
+        Response response = exchangeRatesEndpoint
+                .getHistoricalRates(DATE);
+
 
         assertEquals(response.getStatusCode(), 200);
 
         BaseExchangeResponse ratesResponse = response.as(BaseExchangeResponse.class);
+
         assertTrue(ratesResponse.isSuccess());
         assertTrue(ratesResponse.isHistorical());
+        assertEquals(ratesResponse.getDate(), DATE);
+        validateRatesType(ratesResponse);
 
     }
 
