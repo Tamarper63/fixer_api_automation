@@ -1,28 +1,23 @@
-package org.example.responses;
+package org.example.models;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
-@AllArgsConstructor
+
 @Data
-//@Builder
-public class BaseExchangeResponse {
+public class FixerResponseJson {
 
-   boolean success;
-  long timestamp;
-    @JsonProperty("base") String base;
-    @JsonProperty("date") String date;
-    @JsonProperty("rates") Map<String, Double> rates;
-    @JsonProperty("historical") boolean historical;
-
+    boolean success;
+    long timestamp;
+    String base;
+    String date;
+    Map<String, Double> rates;
+    boolean historical;
 
     @JsonCreator
-    public BaseExchangeResponse(
+    public FixerResponseJson(
             @JsonProperty("success") boolean success,
             @JsonProperty("timestamp") long timestamp,
             @JsonProperty("base") String base,

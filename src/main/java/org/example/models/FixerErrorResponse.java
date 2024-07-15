@@ -7,12 +7,12 @@ import lombok.Data;
 
 @Builder
 @Data
-public class ExchangeRatesErrorResponse {
+public class FixerErrorResponse {
     private boolean success;
     private Error error;
 
     @JsonCreator
-    public ExchangeRatesErrorResponse(
+    public FixerErrorResponse(
             @JsonProperty("success") boolean success,
             @JsonProperty("error") Error error) {
         this.success = success;
