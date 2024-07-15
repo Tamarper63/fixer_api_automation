@@ -1,6 +1,7 @@
 package org.example.tests;
 
 import io.restassured.response.Response;
+import org.example.mockResponse.MockSuccessResponse;
 import org.example.utils.FixerApiUtils;
 import org.example.models.FixerResponseJson;
 import org.example.responses.TomorrowPredictionEndpoint;
@@ -14,7 +15,9 @@ public class FixerTomorrowTests extends BaseApiTest {
 
     @Test
     public void validateDateEqualsTomorrow() {
-        //Using Mock
+        //mock will replace this req until release
+//        FixerResponseJson tomorrowMockResponse = MockSuccessResponse.createTomorrowMockResponse();
+
         Response response = tomorrowPredictionEndpoint.getTomorrowRates();
 
         FixerApiUtils.validateStatusIsOk(response);
