@@ -1,16 +1,16 @@
 package org.example.tests;
 
 import io.restassured.response.Response;
-import org.example.Utils.FixerApiUtils;
+import org.example.utils.FixerApiUtils;
 import org.example.models.FixerErrorResponse;
 import org.example.models.FixerResponseJson;
 import org.example.responses.HistoricalRatesEndpoint;
 import org.example.mockResponse.MockErrorResponse;
 import org.junit.Test;
 
-import static org.example.Utils.FixerApiUtils.validateErrorResponseBody;
-import static org.example.Utils.FixerApiUtils.validateParamsType;
-import static org.example.Utils.DateUtils.getTomorrowsDate;
+import static org.example.utils.FixerApiUtils.validateErrorResponseBody;
+import static org.example.utils.FixerApiUtils.validateParamsType;
+import static org.example.utils.DateUtils.getTomorrowsDate;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -18,10 +18,12 @@ import static org.junit.Assert.assertTrue;
 
 public class FixerHistoricalTests extends BaseApiTest {
     public static final String DATE = "2020-12-24";
+    public static final String INVALID_DATE_FORMAT = "22-12-2024";
+
     HistoricalRatesEndpoint historicalRatesEndpoint = new HistoricalRatesEndpoint();
 
     @Test
-    public void validateHistoricalEqualTrue() {
+    public void validateHistoricalResponseHasHistoricalTrue() {
         Response response = historicalRatesEndpoint.getHistoricalRates(DATE);
 
         FixerApiUtils.validateStatusIsOk(response);
@@ -32,7 +34,7 @@ public class FixerHistoricalTests extends BaseApiTest {
     }
 
     @Test
-    public void validateHistoricalDate() {
+    public void validateRequestedHistoricalDateIsReturned() {
         Response response = historicalRatesEndpoint.getHistoricalRates(DATE);
 
         FixerApiUtils.validateStatusIsOk(response);
@@ -41,9 +43,8 @@ public class FixerHistoricalTests extends BaseApiTest {
         assertThat(actualResponse.getDate(), equalTo(DATE));
     }
 
-    //Potential Errors
     @Test
-    public void inValidateHistoricalDateReturnError() {
+    public void validateInvalidDateReturnsError() {
         String invalidDate = "";
         //expected error
         MockErrorResponse expectedErrorResponse = MockErrorResponse.createInvalidEmptyDateError();
@@ -61,7 +62,7 @@ public class FixerHistoricalTests extends BaseApiTest {
     }
 
     @Test
-    public void testGetHistoricalRatesParamsType() {
+    public void validateResponseTypesIsValid() {
         Response response = historicalRatesEndpoint
                 .getHistoricalRates(DATE);
 
@@ -75,14 +76,15 @@ public class FixerHistoricalTests extends BaseApiTest {
 
         validateParamsType(ratesResponse);
     }
+
     @Test
     public void invalidFutureHistoricalDateReturnError() {
-        String FUTURE_DATE = getTomorrowsDate();
+        String futureDate = getTomorrowsDate();
         // Expected error response
-        FixerErrorResponse expectedErrorResponse = MockErrorResponse.createInvalidFutureDateError();
+        FixerErrorResponse expectedErrorResponse = MockErrorResponse.createInvalidDateError();
 
         // Send request with a future date
-        Response response = historicalRatesEndpoint.getHistoricalRates(FUTURE_DATE);
+        Response response = historicalRatesEndpoint.getHistoricalRates(futureDate);
 
         // Get the actual error response
         FixerErrorResponse actualErrorResponse = response.as(FixerErrorResponse.class);
@@ -92,12 +94,11 @@ public class FixerHistoricalTests extends BaseApiTest {
 
     @Test
     public void invalidDateFormatReturnError() {
-        String DIFFERENT_DATE_FORMAT = "22-12-2024";
         // Expected error response
-        FixerErrorResponse expectedErrorResponse = MockErrorResponse.createInvalidFutureDateError();
+        FixerErrorResponse expectedErrorResponse = MockErrorResponse.createInvalidDateError();
 
         // Send request with a future date
-        Response response = historicalRatesEndpoint.getHistoricalRates(DIFFERENT_DATE_FORMAT);
+        Response response = historicalRatesEndpoint.getHistoricalRates(INVALID_DATE_FORMAT);
 
         // Get the actual error response
         FixerErrorResponse actualErrorResponse = response.as(FixerErrorResponse.class);

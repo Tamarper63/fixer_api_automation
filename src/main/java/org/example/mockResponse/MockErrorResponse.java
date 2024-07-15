@@ -14,7 +14,7 @@ public class MockErrorResponse extends FixerErrorResponse {
         );
     }
 
-    public static MockErrorResponse createInvalidFutureDateError() {
+    public static MockErrorResponse createInvalidDateError() {
         return new MockErrorResponse(
                 false,
                 new Error(302, "invalid_date", "You have entered an invalid date. [Required format: date=YYYY-MM-DD]")

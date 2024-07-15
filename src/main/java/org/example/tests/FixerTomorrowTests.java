@@ -1,12 +1,12 @@
 package org.example.tests;
 
 import io.restassured.response.Response;
-import org.example.Utils.FixerApiUtils;
+import org.example.utils.FixerApiUtils;
 import org.example.models.FixerResponseJson;
 import org.example.responses.TomorrowPredictionEndpoint;
 import org.junit.Test;
 
-import static org.example.Utils.DateUtils.getTomorrowsDate;
+import static org.example.utils.DateUtils.getTomorrowsDate;
 
 public class FixerTomorrowTests extends BaseApiTest {
     TomorrowPredictionEndpoint tomorrowPredictionEndpoint = new TomorrowPredictionEndpoint();

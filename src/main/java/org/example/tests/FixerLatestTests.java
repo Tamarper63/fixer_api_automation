@@ -1,7 +1,7 @@
 package org.example.tests;
 
 import io.restassured.response.Response;
-import org.example.Utils.FixerApiUtils;
+import org.example.utils.FixerApiUtils;
 import org.example.mockResponse.MockErrorResponse;
 import org.example.models.FixerErrorResponse;
 import org.example.models.FixerResponseJson;
@@ -10,7 +10,7 @@ import org.junit.Test;
 import java.time.LocalDate;
 import static io.restassured.RestAssured.given;
 import static org.example.ApiConfig.LATEST_ENDPOINT;
-import static org.example.Utils.FixerApiUtils.validateParamsType;
+import static org.example.utils.FixerApiUtils.validateParamsType;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -52,7 +52,7 @@ public class FixerLatestTests extends BaseApiTest {
     }
 
     @Test
-    public void validateSuccessResponseTypesIsValid() {
+    public void validateResponseTypesIsValid() {
 
         // Perform the actual API request
         Response response = latestRatesEndpoint.getLatestRates();
@@ -67,7 +67,7 @@ public class FixerLatestTests extends BaseApiTest {
     }
 
     @Test
-    public void validateSuccessResponseDateIsToday() {
+    public void validateResponseDateIsToday() {
         ///get response
         Response response = latestRatesEndpoint.getLatestRates();
         ///thorw to object response
