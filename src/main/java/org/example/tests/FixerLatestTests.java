@@ -76,6 +76,36 @@ public class FixerLatestTests extends BaseApiTest {
         FixerApiUtils.validateDate(actualResponse, LocalDate.now().toString());
     }
 
+    @Test
+    public void validateInvalidAccessKeyReturnsErrorResponse() {
+        MockErrorResponse expectedErrorResponse = MockErrorResponse.creatInvalidAccessKeyError();
+        //expected Mock
+
+        // Perform the actual API request without API key
+        Response response = given()
+                .queryParam("access_key", "953a6948da5d998c7565867c5c5aef98") // Provide an empty API key or remove this line to test without key
+                .when()
+                .get(LATEST_ENDPOINT);
+
+        // Deserialize the actual API error response
+        FixerErrorResponse actualErrorResponse = response.as(FixerErrorResponse.class);
+
+        // Validate error code, type, and description
+        assertThat(actualErrorResponse.getError().getCode(), equalTo(expectedErrorResponse.getError().getCode()));
+        assertThat(actualErrorResponse.getError().getInfo(), equalTo(expectedErrorResponse.getError().getInfo()));
+        assertThat(actualErrorResponse.getError().getType(), equalTo(expectedErrorResponse.getError().getType()));
+
+    }
+
+    @Test
+    public void validateResponseHeaders() {
+        // Perform the actual API request
+        Response response = latestRatesEndpoint.getLatestRates();
+
+        // Validate response headers
+        assertThat(response.getHeader("Content-Type"), startsWith("application/json"));
+    }
+
 }
 
 

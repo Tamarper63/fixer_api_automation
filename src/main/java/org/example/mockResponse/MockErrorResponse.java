@@ -26,6 +26,13 @@ public class MockErrorResponse extends FixerErrorResponse {
                 false,
                 new Error(101, "missing_access_key", "You have not supplied an API Access Key. [Required format: access_key=YOUR_ACCESS_KEY]")
         );
+
     }
 
+    public static MockErrorResponse creatInvalidAccessKeyError() {
+        return new MockErrorResponse(
+                false,
+                new Error(101, "invalid_access_key", "You have not supplied a valid API Access Key. [Technical Support: support@apilayer.com]")
+        );
+    }
 }
